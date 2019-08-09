@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.1  
+// @version      1.1
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        http://op1.win007.com/oddslist/*
@@ -67,49 +67,49 @@
     });
   }
 
-  let serias = {
+  let series = {
     1: [],
     x: [],
     2: []
   };
-  let legendData = {
-    1: [],
-    x: [],
-    2: []
-  };
-  function setSerias(obj, name, time) {
+  const legendData = [];
+  function setseries(obj, name, time) {
     const temp1 = {
       type: "line",
 
-      name: `${name}1`,
+      name: `${name}`,
       data: []
     };
     const temp2 = {
       type: "line",
 
-      name: `${name}x`,
+      name: `${name}`,
       data: []
     };
     const temp3 = {
       type: "line",
 
-      name: `${name}2`,
+      name: `${name}`,
       data: []
     };
-    legendData[1].push(`${name}1`);
-    legendData["x"].push(`${name}x`);
-    legendData[2].push(`${name}2`);
+    legendData.push(name);
     obj.forEach(function(item) {
       temp1.data.push([getTimeX(time, item.key), parseFloat(item.odd[0])]);
       temp2.data.push([getTimeX(time, item.key), parseFloat(item.odd[1])]);
       temp3.data.push([getTimeX(time, item.key), parseFloat(item.odd[2])]);
     });
-    temp1.data.pop();
-    temp2.data.pop();
-    temp3.data.pop();
-    serias[1].push(temp1);
-    serias["x"].push(temp2);
-    serias[2].push(temp3);
+    temp1.data = temp1.data.filter(function(item) {
+      return item[0] <= 240;
+    });
+    temp2.data = temp2.data.filter(function(item) {
+      return item[0] <= 240;
+    });
+    temp3.data = temp3.data.filter(function(item) {
+      return item[0] <= 240;
+    });
+    series[1].push(temp1);
+    series["x"].push(temp2);
+    series[2].push(temp3);
   }
   // 获取其他参数
   function getCloseOthers(data, time, totosi) {
@@ -119,7 +119,7 @@
         name: item
       };
       const obj = getChange(parseInt(data[item]));
-      setSerias(obj, item, new Date().getTime());
+      setseries(obj, item, getMatchTime());
       for (let i = 0; i < obj.length; i++) {
         if (time - obj[i].key >= 0) {
           temp.value = obj[i];
@@ -149,11 +149,11 @@
 
     if (totosi1 && !totosi2) {
       time = new Date(totosi1[0].time).getTime();
-      setSerias(totosi1, "totosi", new Date().getTime());
+      setseries(totosi1, "totosi", series);
       rs = totosi1;
     } else if (!totosi1 && totosi2) {
       time = new Date(totosi2[0].time).getTime();
-      setSerias(totosi2, "totosi", new Date().getTime());
+      setseries(totosi2, "totosi", series);
       rs = totosi2;
     } else if (!totosi1 && !totosi2) {
       return {
@@ -163,13 +163,13 @@
     } else if (
       new Date(totosi1[0].time).getTime() > new Date(totosi2[0].time).getTime()
     ) {
-      setSerias(totosi1, "totosi", new Date().getTime());
-      setSerias(totosi2, "totosi.it", new Date().getTime());
+      setseries(totosi1, "totosi", series);
+      setseries(totosi2, "totosi.it", series);
       time = new Date(totosi1[0].time).getTime();
       rs = totosi1;
     } else {
-      setSerias(totosi1, "totosi", new Date().getTime());
-      setSerias(totosi2, "totosi.it", new Date().getTime());
+      setseries(totosi1, "totosi", getMatchTime());
+      setseries(totosi2, "totosi.it", getMatchTime());
       time = new Date(totosi2[0].time).getTime();
       rs = totosi2;
     }
@@ -346,91 +346,73 @@
   function getTimeX(time, t) {
     return Math.round((time - t) / 60000);
   }
-  function main() {
-    const value = getData(window.game);
-    window.odd = value.totosi.odd;
-    const others = getCloseOthers(value.other, value.time, value.totosi.odd);
-    renderTotosi(value.totosi, new Date(value.time).toLocaleString(), others);
+
+  function renderCharts() {
     // 基于准备好的dom，初始化echarts实例
     var myChart1 = echarts.init(document.getElementById("main1"));
     var myChartx = echarts.init(document.getElementById("mainx"));
     var myChart2 = echarts.init(document.getElementById("main2"));
-
+    const baseOption = {
+      title: {
+        text: "走势",
+        x: "center"
+      },
+      tooltip: {
+        trigger: "axis"
+      },
+      xAxis: {
+        type: "value",
+        min: "dataMin",
+        max: "dataMax",
+        inverse: true
+      },
+      yAxis: {
+        type: "value",
+        min: "dataMin",
+        max: "dataMax"
+      },
+      series: [],
+      legend: {
+        top: 30,
+        data: legendData
+      }
+    };
     // 指定图表的配置项和数据
-    var option1 = {
-      title: {
-        text: "走势1"
-      },
-      tooltip: {
-        trigger: "axis"
-      },
-      xAxis: {
-        type: "value",
-        min: "dataMin",
-        max: "dataMax",
-        inverse: true
-      },
-      yAxis: {
-        type: "value",
-        min: "dataMin",
-        max: "dataMax"
-      },
-      series: serias[1],
-      legend: {
-        data: legendData[1]
-      }
-    };
-    var optionx = {
-      title: {
-        text: "走势x"
-      },
-      tooltip: {
-        trigger: "axis"
-      },
-      xAxis: {
-        type: "value",
-        min: "dataMin",
-        max: "dataMax",
-        inverse: true
-      },
-      yAxis: {
-        type: "value",
-        min: "dataMin",
-        max: "dataMax"
-      },
-      series: serias["x"],
-      legend: {
-        data: legendData["x"]
-      }
-    };
-    var option2 = {
-      title: {
-        text: "走势2"
-      },
-      tooltip: {
-        trigger: "axis"
-      },
-      xAxis: {
-        type: "value",
-        min: "dataMin",
-        max: "dataMax",
-        inverse: true
-      },
-      yAxis: {
-        type: "value",
-        min: "dataMin",
-        max: "dataMax"
-      },
-      series: serias[2],
-      legend: {
-        data: legendData[2]
-      }
-    };
+    const option1 = Object.assign({}, baseOption, {
+      tooltip: { text: "走势1", x: "center" },
+      series: series[1]
+    });
+    const optionx = Object.assign({}, baseOption, {
+      tooltip: { text: "走势x", x: "center" },
+      series: series["x"]
+    });
+    const option2 = Object.assign({}, baseOption, {
+      tooltip: { text: "走势2", x: "center" },
+      series: series[2]
+    });
 
     // 使用刚指定的配置项和数据显示图表。
     myChart1.setOption(option1);
     myChartx.setOption(optionx);
     myChart2.setOption(option2);
+  }
+
+  //获取比赛时间
+  function getMatchTime() {
+    const temp = window.MatchTime.split(",");
+
+    return new Date(
+      `${temp[0]}-${temp[1].substring(0, 2)}-${temp[2]} ${parseInt(temp[3]) +
+        8}:${temp[4]}`
+    ).getTime();
+  }
+
+  function main() {
+    const value = getData(window.game);
+    window.odd = value.totosi.odd;
+    const others = getCloseOthers(value.other, value.time, value.totosi.odd);
+    renderTotosi(value.totosi, new Date(value.time).toLocaleString(), others);
+    renderCharts();
   }
   main();
 })();
