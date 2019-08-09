@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        http://op1.win007.com/oddslist/*
