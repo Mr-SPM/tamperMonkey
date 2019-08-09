@@ -155,11 +155,11 @@
 
     if (totosi1 && !totosi2) {
       time = new Date(totosi1[0].time).getTime();
-      setseries(totosi1, "totosi", series);
+      setseries(totosi1, "totosi", getMatchTime());
       rs = totosi1;
     } else if (!totosi1 && totosi2) {
       time = new Date(totosi2[0].time).getTime();
-      setseries(totosi2, "totosi", series);
+      setseries(totosi2, "totosi", getMatchTime());
       rs = totosi2;
     } else if (!totosi1 && !totosi2) {
       return {
@@ -169,8 +169,8 @@
     } else if (
       new Date(totosi1[0].time).getTime() > new Date(totosi2[0].time).getTime()
     ) {
-      setseries(totosi1, "totosi", series);
-      setseries(totosi2, "totosi.it", series);
+      setseries(totosi1, "totosi", getMatchTime());
+      setseries(totosi2, "totosi.it", getMatchTime());
       time = new Date(totosi1[0].time).getTime();
       rs = totosi1;
     } else {
@@ -274,13 +274,13 @@
       2: 0
     };
     data.forEach(item => {
-      if (item.oddx[0] > 0) {
+      if (item.oddx[0] <= 0) {
         stat[1] += 1;
       }
-      if (item.oddx[1] > 0) {
+      if (item.oddx[1] <= 0) {
         stat["x"] += 1;
       }
-      if (item.oddx[2] > 0) {
+      if (item.oddx[2] <= 0) {
         stat[2] += 1;
       }
       tbody += `<tr style="padding: 5px;font-size:18px;">
@@ -408,9 +408,11 @@
   function getMatchTime() {
     const temp = window.MatchTime.split(",");
 
-    return new Date(
-      `${temp[0]}-${temp[1].substring(0, 2)}-${temp[2]} ${temp[3]}:${temp[4]}`
-    ).getTime() + 28800000;
+    return (
+      new Date(
+        `${temp[0]}-${temp[1].substring(0, 2)}-${temp[2]} ${temp[3]}:${temp[4]}`
+      ).getTime() + 28800000
+    );
   }
 
   function main() {
