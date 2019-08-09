@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  try to take over the world!
-// @author       You
+// @version      1.1  
+// @description  分析足球数据，图形化展示赔率走势
+// @author       Mr-SPM
 // @match        http://op1.win007.com/oddslist/*
 // @grant        none
 // @require      https://cdn.bootcss.com/echarts/4.2.1/echarts.min.js
+// @contributionURL            https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=your.email.here@412354742@qq.com&item_name=Greasy+Fork+donation
+// contributionAmount  6.66
 // ==/UserScript==
 
 (function() {
