@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        http://op1.win007.com/oddslist/*
@@ -48,7 +48,13 @@
     delete obj["TotoSi"];
     delete obj["Totosi.it"];
     return {
-      totosi: totosi.rs[0],
+      totosi: totosi.rs
+        ? totosi.rs[0]
+        : {
+            key: getMatchTime(),
+            time: new Date(getMatchTime()).toLocaleString(),
+            odd: [0, 0, 0]
+          },
       other: obj,
       time: totosi.time
     };
@@ -369,7 +375,8 @@
       yAxis: {
         type: "value",
         min: "dataMin",
-        max: "dataMax"
+        max: "dataMax",
+        inverse: true
       },
       series: [],
       legend: {
