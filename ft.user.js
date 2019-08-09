@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.3.1
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        http://op1.win007.com/oddslist/*
@@ -409,9 +409,8 @@
     const temp = window.MatchTime.split(",");
 
     return new Date(
-      `${temp[0]}-${temp[1].substring(0, 2)}-${temp[2]} ${parseInt(temp[3]) +
-        8}:${temp[4]}`
-    ).getTime();
+      `${temp[0]}-${temp[1].substring(0, 2)}-${temp[2]} ${temp[3]}:${temp[4]}`
+    ).getTime() + 28800000;
   }
 
   function main() {
