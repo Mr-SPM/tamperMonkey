@@ -20,6 +20,15 @@ declare interface Window {
   game?: any;
   MatchTime?: any;
 }
+interface IObejct {
+  [params: string]: any;
+}
+interface OddInfo {
+  key: number; //时间戳
+  odd: string[]; // odd数组
+  time: string; //时间字符串
+  value?: IObejct;
+}
 
 (function() {
   "use strict";
@@ -47,7 +56,7 @@ declare interface Window {
   }
 
   // 获取数据
-  function getData(game) {
+  function getData(game: any) {
     const obj = {};
     game.forEach(item => {
       const rs = item.split("|");
@@ -70,7 +79,7 @@ declare interface Window {
     };
   }
 
-  function getChange(key) {
+  function getChange(key: string): OddInfo[] {
     let changes = window.hsDetail.items(parseInt(key));
     if (!changes) return;
     return changes.split(";").map(item => {
@@ -89,7 +98,7 @@ declare interface Window {
     2: []
   };
   const legendData = [];
-  function setseries(obj, name, time) {
+  function setseries(obj: OddInfo[], name: string, time: number) {
     const temp1 = {
       type: "line",
 
@@ -128,16 +137,16 @@ declare interface Window {
     series[2].push(temp3);
   }
   // 获取其他参数
-  function getCloseOthers(data, time, totosi) {
+  function getCloseOthers(data: object, time: number, totosi: OddInfo) {
     const result = [];
     Object.keys(data).forEach(function(item) {
       let temp = {
         name: item,
-        value: 0,
+        value: {},
         x: 0,
         oddx: []
       };
-      const obj = getChange(parseInt(data[item]));
+      const obj = getChange(data[item]);
       setseries(obj, item, getMatchTime());
       for (let i = 0; i < obj.length; i++) {
         if (time - obj[i].key >= 0) {
@@ -160,7 +169,7 @@ declare interface Window {
   }
 
   // 获取时间最近的TotoSi
-  function getLatestTotosi(key1, key2) {
+  function getLatestTotosi(key1: string, key2: string) {
     let time = new Date().getTime();
     let rs;
     const totosi1 = getChange(key1);
@@ -198,7 +207,7 @@ declare interface Window {
     };
   }
 
-  function renderTotosi(totosi, time, others) {
+  function renderTotosi(totosi: OddInfo, time: string, others: OddInfo[]) {
     // 创建div
     const divDom = document.createElement("div");
     divDom.setAttribute("id", "myData");
@@ -250,7 +259,9 @@ declare interface Window {
       console.log("开始计算");
       const odd = window.odd;
       const money =
-        (<HTMLInputElement>document.getElementById("myMoney")).value || 300;
+        parseFloat(
+          (<HTMLInputElement>document.getElementById("myMoney")).value
+        ) || 300;
       document.getElementById("pay").innerHTML = `1:${predict(
         money,
         90,
@@ -270,7 +281,13 @@ declare interface Window {
     };
   }
   // 计算
-  function predict(sum, re, odd, rate, resultRate) {
+  function predict(
+    sum: number,
+    re: number,
+    odd: number,
+    rate: number,
+    resultRate: number
+  ) {
     if (sum && re && odd) {
       var p = re / 100 / odd;
       return parseInt(
