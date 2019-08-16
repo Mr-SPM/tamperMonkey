@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.3.3
+// @version      1.3.4
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        *//op1.win007.com/oddslist/*
@@ -84,6 +84,7 @@ interface Series {
           },
       other: obj,
       time: totosi.time,
+      totosiSum: totosi.rs ? totosi.rs.filter(item => !!item.key) : [],
     };
   }
 
@@ -186,29 +187,25 @@ interface Series {
     });
   }
 
-  function getLatestOthers(data: object, time: number, totosi: OddInfo) {
+  function getLatestOthers(data: object, time: number, totosi: OddInfo[]) {
     const result = [];
-    Object.keys(data).forEach(function(item) {
-      let temp = {
-        name: item,
-        value: {},
-        x: 0,
-        oddx: [],
-      };
-      const obj = getChange(data[item]);
-      setseries(obj, item, getMatchTime());
-      if (obj.length > 0) {
-        result.push({
-          name: item,
-          x: Math.round((time - obj[0].key) / 1000),
-          oddx: [
-            (parseFloat(obj[0].odd[0]) - parseFloat(totosi[0])).toFixed(2),
-            (parseFloat(obj[0].odd[1]) - parseFloat(totosi[1])).toFixed(2),
-            (parseFloat(obj[0].odd[2]) - parseFloat(totosi[2])).toFixed(2),
-          ],
-          value: obj[0],
-        });
-      }
+    totosi.forEach(t => {
+      Object.keys(data).forEach(function(item) {
+        const obj = getChange(data[item]);
+        setseries(obj, item, getMatchTime());
+        if (obj.length > 0) {
+          result.push({
+            name: item,
+            x: Math.round((time - obj[0].key) / 1000),
+            oddx: [
+              (parseFloat(obj[0].odd[0]) - parseFloat(t.odd[0])).toFixed(2),
+              (parseFloat(obj[0].odd[1]) - parseFloat(t.odd[1])).toFixed(2),
+              (parseFloat(obj[0].odd[2]) - parseFloat(t.odd[2])).toFixed(2),
+            ],
+            value: obj[0],
+          });
+        }
+      });
     });
     return result;
   }
@@ -535,7 +532,7 @@ interface Series {
     const latestOthers = getLatestOthers(
       value.other,
       value.time,
-      value.totosi.odd
+      value.totosiSum
     );
     renderTotosi(
       value.totosi,

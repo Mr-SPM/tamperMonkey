@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.3.3
+// @version      1.3.4
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        *//op1.win007.com/oddslist/*
@@ -65,7 +65,8 @@ var __assign = (this && this.__assign) || function () {
                     odd: [0, 0, 0]
                 },
             other: obj,
-            time: totosi.time
+            time: totosi.time,
+            totosiSum: totosi.rs ? totosi.rs.filter(function (item) { return !!item.key; }) : []
         };
     }
     function getChange(key) {
@@ -161,27 +162,23 @@ var __assign = (this && this.__assign) || function () {
     }
     function getLatestOthers(data, time, totosi) {
         var result = [];
-        Object.keys(data).forEach(function (item) {
-            var temp = {
-                name: item,
-                value: {},
-                x: 0,
-                oddx: []
-            };
-            var obj = getChange(data[item]);
-            setseries(obj, item, getMatchTime());
-            if (obj.length > 0) {
-                result.push({
-                    name: item,
-                    x: Math.round((time - obj[0].key) / 1000),
-                    oddx: [
-                        (parseFloat(obj[0].odd[0]) - parseFloat(totosi[0])).toFixed(2),
-                        (parseFloat(obj[0].odd[1]) - parseFloat(totosi[1])).toFixed(2),
-                        (parseFloat(obj[0].odd[2]) - parseFloat(totosi[2])).toFixed(2),
-                    ],
-                    value: obj[0]
-                });
-            }
+        totosi.forEach(function (t) {
+            Object.keys(data).forEach(function (item) {
+                var obj = getChange(data[item]);
+                setseries(obj, item, getMatchTime());
+                if (obj.length > 0) {
+                    result.push({
+                        name: item,
+                        x: Math.round((time - obj[0].key) / 1000),
+                        oddx: [
+                            (parseFloat(obj[0].odd[0]) - parseFloat(t.odd[0])).toFixed(2),
+                            (parseFloat(obj[0].odd[1]) - parseFloat(t.odd[1])).toFixed(2),
+                            (parseFloat(obj[0].odd[2]) - parseFloat(t.odd[2])).toFixed(2),
+                        ],
+                        value: obj[0]
+                    });
+                }
+            });
         });
         return result;
     }
@@ -361,7 +358,7 @@ var __assign = (this && this.__assign) || function () {
         var value = getData(window.game);
         window.odd = value.totosi.odd;
         var others = getCloseOthers(value.other, value.time, value.totosi.odd);
-        var latestOthers = getLatestOthers(value.other, value.time, value.totosi.odd);
+        var latestOthers = getLatestOthers(value.other, value.time, value.totosiSum);
         renderTotosi(value.totosi, new Date(value.time).toLocaleString(), others, latestOthers);
         renderCharts();
     }
