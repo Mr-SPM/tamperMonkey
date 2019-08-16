@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.3.4
+// @version      1.4.0
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        *//op1.win007.com/oddslist/*
@@ -84,7 +84,7 @@ interface Series {
           },
       other: obj,
       time: totosi.time,
-      totosiSum: totosi.rs ? totosi.rs.filter(item => !!item.key) : [],
+      totosiSum: totosi.totosis,
     };
   }
 
@@ -187,7 +187,7 @@ interface Series {
     });
   }
 
-  function getLatestOthers(data: object, time: number, totosi: OddInfo[]) {
+  function getLatestOthers(data: object, time: number, totosi: OddInfo[][]) {
     const result = [];
     totosi.forEach(t => {
       Object.keys(data).forEach(function(item) {
@@ -196,11 +196,11 @@ interface Series {
         if (obj.length > 0) {
           result.push({
             name: item,
-            x: Math.round((time - obj[0].key) / 1000),
+            x: Math.round((t[0].key - obj[0].key) / 1000),
             oddx: [
-              (parseFloat(obj[0].odd[0]) - parseFloat(t.odd[0])).toFixed(2),
-              (parseFloat(obj[0].odd[1]) - parseFloat(t.odd[1])).toFixed(2),
-              (parseFloat(obj[0].odd[2]) - parseFloat(t.odd[2])).toFixed(2),
+              (parseFloat(obj[0].odd[0]) - parseFloat(t[0].odd[0])).toFixed(2),
+              (parseFloat(obj[0].odd[1]) - parseFloat(t[0].odd[1])).toFixed(2),
+              (parseFloat(obj[0].odd[2]) - parseFloat(t[0].odd[2])).toFixed(2),
             ],
             value: obj[0],
           });
@@ -246,6 +246,7 @@ interface Series {
     return {
       time: time,
       rs: rs,
+      totosis: [totosi1, totosi2].filter(item => !!item),
     };
   }
 
