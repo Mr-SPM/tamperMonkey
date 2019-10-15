@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.5.5
+// @version      1.5.6
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        *//op1.win007.com/oddslist/*
@@ -84,7 +84,7 @@ interface Series {
           },
       other: obj,
       time: totosi.time,
-      totosiSum: totosi.totosis,
+      totosiSum: totosi.totosis || [],
     };
   }
 
@@ -143,13 +143,13 @@ interface Series {
       temp3.data.push([getTimeX(time, item.key), parseFloat(item.odd[2])]);
     });
     temp1.data = temp1.data.filter(function(item) {
-      return item[0] <= 240;
+      return item[0] <= 1440;
     });
     temp2.data = temp2.data.filter(function(item) {
-      return item[0] <= 240;
+      return item[0] <= 1440;
     });
     temp3.data = temp3.data.filter(function(item) {
-      return item[0] <= 240;
+      return item[0] <= 1440;
     });
     series[1].push(temp1);
     series['x'].push(temp2);
@@ -183,7 +183,7 @@ interface Series {
       result.push(temp);
     });
     return result.filter(function(item) {
-      return !!item.oddx && item.x < 1800;
+      return !!item.oddx[0];
     });
   }
 
