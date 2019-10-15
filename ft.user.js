@@ -4,7 +4,7 @@
 // @version      1.5.6
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
-// @match        *//op1.win007.com/oddslist/*
+// @match        *://op1.win007.com/oddslist/*
 // @match        *://vip.win0168.com/1x2/oddslist/*
 // @grant        none
 // @require      https://cdn.bootcss.com/echarts/4.2.1/echarts.min.js
