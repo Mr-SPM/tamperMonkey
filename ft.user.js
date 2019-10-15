@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.4.0
+// @version      1.5.5
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        *//op1.win007.com/oddslist/*
@@ -35,7 +35,7 @@ var __assign = (this && this.__assign) || function () {
     function createButton() {
         var button = document.createElement('button');
         button.onclick = function () {
-            // renderTotosi(getLatestTotosi());
+            main();
         };
         button.style.position = 'absolute';
         button.style.left = '100px';
@@ -363,5 +363,5 @@ var __assign = (this && this.__assign) || function () {
         renderTotosi(value.totosi, new Date(value.time).toLocaleString(), others, latestOthers);
         renderCharts();
     }
-    main();
+    createButton();
 })();

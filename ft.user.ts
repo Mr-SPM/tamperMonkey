@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.4.0
+// @version      1.5.5
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        *//op1.win007.com/oddslist/*
@@ -20,7 +20,7 @@ declare interface Window {
   game?: any;
   MatchTime?: any;
 }
-interface IObejct {
+interface IObject {
   [params: string]: any;
 }
 
@@ -28,7 +28,7 @@ interface OddInfo {
   key: number; //时间戳
   odd: string[]; // odd数组
   time: string; //时间字符串
-  value?: IObejct;
+  value?: IObject;
 }
 
 interface Series {
@@ -52,7 +52,7 @@ interface Series {
   function createButton() {
     const button = document.createElement('button');
     button.onclick = function() {
-      // renderTotosi(getLatestTotosi());
+      main();
     };
     button.style.position = 'absolute';
     button.style.left = '100px';
@@ -543,5 +543,5 @@ interface Series {
     );
     renderCharts();
   }
-  main();
+  createButton();
 })();
