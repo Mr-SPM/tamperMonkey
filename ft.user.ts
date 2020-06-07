@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.5.6
+// @version      1.6.0
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
-// @match        *//op1.win007.com/oddslist/*
+// @match        *://op1.win007.com/oddslist/*
 // @match        *://vip.win0168.com/1x2/oddslist/*
 // @grant        none
 // @require      https://cdn.bootcss.com/echarts/4.2.1/echarts.min.js
@@ -38,8 +38,8 @@ interface Series {
   areaStyle?: any;
 }
 
-(function() {
-  'use strict';
+(function () {
+  "use strict";
   // id映射
   // totosi 88664978
   // totosi.it 88635286
@@ -50,30 +50,30 @@ interface Series {
 
   // 创建按钮
   function createButton() {
-    const button = document.createElement('button');
-    button.onclick = function() {
+    const button = document.createElement("button");
+    button.onclick = function () {
       main();
     };
-    button.style.position = 'absolute';
-    button.style.left = '100px';
-    button.style.top = '150px';
-    button.style.color = 'red';
-    button.innerHTML = '分析';
-    button.style.zIndex = '2000';
+    button.style.position = "absolute";
+    button.style.left = "100px";
+    button.style.top = "150px";
+    button.style.color = "red";
+    button.innerHTML = "分析";
+    button.style.zIndex = "2000";
     document.body.append(button);
   }
 
   // 获取数据
   function getData(game: any) {
     const obj = {};
-    game.forEach(item => {
-      const rs = item.split('|');
+    game.forEach((item) => {
+      const rs = item.split("|");
       obj[rs[2]] = rs[1];
     });
-    const totosi = getLatestTotosi(obj['TotoSi'], obj['Totosi.it']);
+    const totosi = getLatestTotosi(obj["TotoSi"], obj["Totosi.it"]);
     window.time = new Date(totosi.time).toLocaleString();
-    delete obj['TotoSi'];
-    delete obj['Totosi.it'];
+    delete obj["TotoSi"];
+    delete obj["Totosi.it"];
     return {
       totosi: totosi.rs
         ? totosi.rs[0]
@@ -91,11 +91,11 @@ interface Series {
   function getChange(key: string): OddInfo[] {
     let changes = window.hsDetail.items(parseInt(key));
     if (!changes) return;
-    return changes.split(';').map(item => {
-      const temp = item.split('|');
+    return changes.split(";").map((item) => {
+      const temp = item.split("|");
       return {
-        key: new Date('2019-' + temp[3]).getTime(),
-        time: '2019-' + temp[3],
+        key: new Date("2020-" + temp[3]).getTime(),
+        time: "2020-" + temp[3],
         odd: [temp[0], temp[1], temp[2]],
       };
     });
@@ -114,51 +114,51 @@ interface Series {
     needArea = false
   ) {
     const temp1: Series = {
-      type: 'line',
+      type: "line",
 
       name: `${name}`,
       data: [],
     };
     const temp2: Series = {
-      type: 'line',
+      type: "line",
 
       name: `${name}`,
       data: [],
     };
     const temp3: Series = {
-      type: 'line',
+      type: "line",
 
       name: `${name}`,
       data: [],
     };
     if (needArea) {
-      temp1.areaStyle = { origin: 'end' };
-      temp2.areaStyle = { origin: 'end' };
-      temp3.areaStyle = { origin: 'end' };
+      temp1.areaStyle = { origin: "end" };
+      temp2.areaStyle = { origin: "end" };
+      temp3.areaStyle = { origin: "end" };
     }
     legendData.push(name);
-    obj.forEach(function(item) {
+    obj.forEach(function (item) {
       temp1.data.push([getTimeX(time, item.key), parseFloat(item.odd[0])]);
       temp2.data.push([getTimeX(time, item.key), parseFloat(item.odd[1])]);
       temp3.data.push([getTimeX(time, item.key), parseFloat(item.odd[2])]);
     });
-    temp1.data = temp1.data.filter(function(item) {
+    temp1.data = temp1.data.filter(function (item) {
       return item[0] <= 1440;
     });
-    temp2.data = temp2.data.filter(function(item) {
+    temp2.data = temp2.data.filter(function (item) {
       return item[0] <= 1440;
     });
-    temp3.data = temp3.data.filter(function(item) {
+    temp3.data = temp3.data.filter(function (item) {
       return item[0] <= 1440;
     });
     series[1].push(temp1);
-    series['x'].push(temp2);
+    series["x"].push(temp2);
     series[2].push(temp3);
   }
   // 获取其他参数
   function getCloseOthers(data: object, time: number, totosi: OddInfo) {
     const result = [];
-    Object.keys(data).forEach(function(item) {
+    Object.keys(data).forEach(function (item) {
       let temp = {
         name: item,
         value: {},
@@ -166,7 +166,7 @@ interface Series {
         oddx: [],
       };
       const obj = getChange(data[item]);
-      setseries(obj, item, getMatchTime());
+      // setseries(obj, item, getMatchTime());
       for (let i = 0; i < obj.length; i++) {
         if (time - obj[i].key >= 0) {
           temp.value = obj[i];
@@ -182,31 +182,32 @@ interface Series {
       }
       result.push(temp);
     });
-    return result.filter(function(item) {
+    return result.filter(function (item) {
       return !!item.oddx[0];
     });
   }
 
-  function getLatestOthers(data: object, time: number, totosi: OddInfo[][]) {
+  /** 获取最新的比赛趋势 */
+  function getLatestOthers(data: object, time: number) {
     const result = [];
-    totosi.forEach(t => {
-      Object.keys(data).forEach(function(item) {
+    // totosi.forEach((t) => {
+      Object.keys(data).forEach(function (item) {
         const obj = getChange(data[item]);
         setseries(obj, item, getMatchTime());
-        if (obj.length > 0) {
-          result.push({
-            name: item,
-            x: Math.round((t[0].key - obj[0].key) / 1000),
-            oddx: [
-              (parseFloat(obj[0].odd[0]) - parseFloat(t[0].odd[0])).toFixed(2),
-              (parseFloat(obj[0].odd[1]) - parseFloat(t[0].odd[1])).toFixed(2),
-              (parseFloat(obj[0].odd[2]) - parseFloat(t[0].odd[2])).toFixed(2),
-            ],
-            value: obj[0],
-          });
-        }
+        // if (obj.length > 0) {
+        //   result.push({
+        //     name: item,
+        //     x: Math.round((t[0].key - obj[0].key) / 1000),
+        //     oddx: [
+        //       (parseFloat(obj[0].odd[0]) - parseFloat(t[0].odd[0])).toFixed(2),
+        //       (parseFloat(obj[0].odd[1]) - parseFloat(t[0].odd[1])).toFixed(2),
+        //       (parseFloat(obj[0].odd[2]) - parseFloat(t[0].odd[2])).toFixed(2),
+        //     ],
+        //     value: obj[0],
+        //   });
+        // }
       });
-    });
+    // });
     return result;
   }
 
@@ -219,11 +220,11 @@ interface Series {
 
     if (totosi1 && !totosi2) {
       time = new Date(totosi1[0].time).getTime();
-      setseries(totosi1, 'totosi', getMatchTime(), true);
+      setseries(totosi1, "totosi", getMatchTime(), true);
       rs = totosi1;
     } else if (!totosi1 && totosi2) {
       time = new Date(totosi2[0].time).getTime();
-      setseries(totosi2, 'totosi', getMatchTime(), true);
+      setseries(totosi2, "totosi", getMatchTime(), true);
       rs = totosi2;
     } else if (!totosi1 && !totosi2) {
       return {
@@ -233,20 +234,20 @@ interface Series {
     } else if (
       new Date(totosi1[0].time).getTime() > new Date(totosi2[0].time).getTime()
     ) {
-      setseries(totosi1, 'totosi', getMatchTime(), true);
-      setseries(totosi2, 'totosi.it', getMatchTime(), true);
+      setseries(totosi1, "totosi", getMatchTime(), true);
+      setseries(totosi2, "totosi.it", getMatchTime(), true);
       time = new Date(totosi1[0].time).getTime();
       rs = totosi1;
     } else {
-      setseries(totosi1, 'totosi', getMatchTime(), true);
-      setseries(totosi2, 'totosi.it', getMatchTime(), true);
+      setseries(totosi1, "totosi", getMatchTime(), true);
+      setseries(totosi2, "totosi.it", getMatchTime(), true);
       time = new Date(totosi2[0].time).getTime();
       rs = totosi2;
     }
     return {
       time: time,
       rs: rs,
-      totosis: [totosi1, totosi2].filter(item => !!item),
+      totosis: [totosi1, totosi2].filter((item) => !!item),
     };
   }
 
@@ -257,9 +258,9 @@ interface Series {
     latestOthers: OddInfo[]
   ) {
     // 创建div
-    const divDom = document.createElement('div');
-    divDom.setAttribute('id', 'myData');
-    divDom.style.backgroundColor = '#fff';
+    const divDom = document.createElement("div");
+    divDom.setAttribute("id", "myData");
+    divDom.style.backgroundColor = "#fff";
     const oddChange = forEachOdd();
     const divWithTitle = `<div style="position:absolute;left:10px;top:40px;z-index:2000;text-align:center;background-color:#fff;color:#1890ff;padding:10px;margin:10px;border-radius:5px;border: 1px solid #1890ff">
 <h1>分析</h1>
@@ -326,14 +327,14 @@ interface Series {
 </div>`;
     divDom.innerHTML = divWithTitle;
     document.body.append(divDom);
-    document.getElementById('calculator').onclick = function() {
-      console.log('开始计算');
+    document.getElementById("calculator").onclick = function () {
+      console.log("开始计算");
       const odd = window.odd;
       const money =
         parseFloat(
-          (<HTMLInputElement>document.getElementById('myMoney')).value
+          (<HTMLInputElement>document.getElementById("myMoney")).value
         ) || 300;
-      document.getElementById('pay').innerHTML = `1:${predict(
+      document.getElementById("pay").innerHTML = `1:${predict(
         money,
         90,
         parseFloat(odd[0]),
@@ -347,8 +348,8 @@ interface Series {
         0.91
       )}`;
     };
-    document.getElementById('myBtn').onclick = function() {
-      document.getElementById('myData').style.display = 'none';
+    document.getElementById("myBtn").onclick = function () {
+      document.getElementById("myData").style.display = "none";
     };
   }
   // 计算
@@ -365,22 +366,22 @@ interface Series {
         (((((odd + 1) * p - 1) / odd) * sum * rate * resultRate) / 5).toString()
       );
     } else {
-      return '数据错误，请重试！';
+      return "数据错误，请重试！";
     }
   }
   function renderTable(data) {
-    let tbody = '';
+    let tbody = "";
     const stat = {
       1: 0,
       x: 0,
       2: 0,
     };
-    data.forEach(item => {
+    data.forEach((item) => {
       if (item.oddx[0] <= 0) {
         stat[1] += 1;
       }
       if (item.oddx[1] <= 0) {
-        stat['x'] += 1;
+        stat["x"] += 1;
       }
       if (item.oddx[2] <= 0) {
         stat[2] += 1;
@@ -388,18 +389,18 @@ interface Series {
       tbody += `<tr style="padding: 5px;font-size:18px;">
       <td style="padding: 5px;font-size:18px;">${item.name}</td>
         <td style="font-size:18px;color:${
-          item.oddx[0] > 0 ? '#44b549' : '#333'
+          item.oddx[0] > 0 ? "#44b549" : "#333"
         }">${item.oddx[0]}</td>
         <td style="font-size:18px;color:${
-          item.oddx[1] > 0 ? '#44b549' : '#333'
+          item.oddx[1] > 0 ? "#44b549" : "#333"
         }">${item.oddx[1]}</td>
         <td style="font-size:18px;color:${
-          item.oddx[2] > 0 ? '#44b549' : '#333'
+          item.oddx[2] > 0 ? "#44b549" : "#333"
         }" >${item.oddx[2]}</td>
         <td style="padding: 5px;font-size:18px;">${item.value.odd[0]}</td>
         <td style="padding: 5px;font-size:18px;">${item.value.odd[1]}</td>
         <td style="padding: 5px;font-size:18px;">${item.value.odd[2]}</td>
-        <td style="color:${item.x < 1800 ? 'red' : '#333'}">${resultFormat(
+        <td style="color:${item.x < 1800 ? "red" : "#333"}">${resultFormat(
         item.x
       )}</td>
         <td style="padding: 5px;font-size:18px;">${item.value.time}</td>
@@ -408,7 +409,7 @@ interface Series {
     const sum = `<tr style="font-weight: bold;">
     <td>合计</td>
     <td>${stat[1]}次</td>
-    <td>${stat['x']}次</td>
+    <td>${stat["x"]}次</td>
     <td>${stat[2]}次</td>
     <td>-</td>
     <td>-</td>
@@ -422,9 +423,9 @@ interface Series {
     var h = Math.floor((result / 3600) % 24);
     var m = Math.floor((result / 60) % 60);
     if (h < 1) {
-      return (result = m + '分钟');
+      return (result = m + "分钟");
     } else {
-      return (result = h + '小时' + m + '分钟');
+      return (result = h + "小时" + m + "分钟");
     }
   }
   function forEachOdd() {
@@ -434,8 +435,8 @@ interface Series {
       lose: 0,
       sum: 0,
     };
-    Object.keys(window.hsDetail._hash).forEach(function(item) {
-      const temp = window.hsDetail._hash[item].replace(/;/g, '|').split('|');
+    Object.keys(window.hsDetail._hash).forEach(function (item) {
+      const temp = window.hsDetail._hash[item].replace(/;/g, "|").split("|");
       if (temp[7]) {
         odd.sum += 1;
         if (parseFloat(temp[7]) - parseFloat(temp[0]) > 0) {
@@ -457,33 +458,33 @@ interface Series {
 
   function renderCharts() {
     // 基于准备好的dom，初始化echarts实例
-    var myChart1 = echarts.init(<HTMLDivElement>(
-      document.getElementById('main1')
-    ));
-    var myChartx = echarts.init(<HTMLDivElement>(
-      document.getElementById('mainx')
-    ));
-    var myChart2 = echarts.init(<HTMLDivElement>(
-      document.getElementById('main2')
-    ));
-    const baseOption = {
+    var myChart1 = echarts.init(
+      <HTMLDivElement>document.getElementById("main1")
+    );
+    var myChartx = echarts.init(
+      <HTMLDivElement>document.getElementById("mainx")
+    );
+    var myChart2 = echarts.init(
+      <HTMLDivElement>document.getElementById("main2")
+    );
+    const baseOption: echarts.EChartOption = {
       title: {
-        text: '走势',
-        x: 'center',
+        text: "走势",
+        x: "center",
       },
       tooltip: {
-        trigger: 'axis',
+        trigger: "axis",
       },
       xAxis: {
-        type: 'value',
-        min: 'dataMin',
-        max: 'dataMax',
+        type: "value",
+        min: "dataMin",
+        max: "dataMax",
         inverse: true,
       },
       yAxis: {
-        type: 'value',
-        min: 'dataMin',
-        max: 'dataMax',
+        type: "value",
+        min: "dataMin",
+        max: "dataMax",
         inverse: true,
       },
       series: [],
@@ -491,21 +492,21 @@ interface Series {
         top: 30,
         data: legendData,
       },
-    } as echarts.EChartOption;
+    };
     // 指定图表的配置项和数据
     const option1 = {
       ...baseOption,
-      title: { text: '走势1', x: 'center' },
+      title: { text: "走势1", x: "center" },
       series: series[1],
     };
     const optionx = {
       ...baseOption,
-      title: { text: '走势x', x: 'center' },
-      series: series['x'],
+      title: { text: "走势x", x: "center" },
+      series: series["x"],
     };
     const option2 = {
       ...baseOption,
-      title: { text: '走势2', x: 'center' },
+      title: { text: "走势2", x: "center" },
       series: series[2],
     };
 
@@ -517,7 +518,7 @@ interface Series {
 
   //获取比赛时间
   function getMatchTime() {
-    const temp = window.MatchTime.split(',');
+    const temp = window.MatchTime.split(",");
 
     return (
       new Date(
@@ -533,7 +534,6 @@ interface Series {
     const latestOthers = getLatestOthers(
       value.other,
       value.time,
-      value.totosiSum
     );
     renderTotosi(
       value.totosi,
