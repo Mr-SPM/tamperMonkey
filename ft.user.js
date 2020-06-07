@@ -117,13 +117,13 @@ var __assign = (this && this.__assign) || function () {
             temp3.data.push([getTimeX(time, item.key), parseFloat(item.odd[2])]);
         });
         temp1.data = temp1.data.filter(function (item) {
-            return item[0] <= 1440;
+            return item[0] <= 1440 / 2;
         });
         temp2.data = temp2.data.filter(function (item) {
-            return item[0] <= 1440;
+            return item[0] <= 1440 / 2;
         });
         temp3.data = temp3.data.filter(function (item) {
-            return item[0] <= 1440;
+            return item[0] <= 1440 / 2;
         });
         series[1].push(temp1);
         series["x"].push(temp2);

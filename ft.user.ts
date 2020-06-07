@@ -143,13 +143,13 @@ interface Series {
       temp3.data.push([getTimeX(time, item.key), parseFloat(item.odd[2])]);
     });
     temp1.data = temp1.data.filter(function (item) {
-      return item[0] <= 1440;
+      return item[0] <= 1440 / 2;
     });
     temp2.data = temp2.data.filter(function (item) {
-      return item[0] <= 1440;
+      return item[0] <= 1440 / 2;
     });
     temp3.data = temp3.data.filter(function (item) {
-      return item[0] <= 1440;
+      return item[0] <= 1440 / 2;
     });
     series[1].push(temp1);
     series["x"].push(temp2);
@@ -191,22 +191,22 @@ interface Series {
   function getLatestOthers(data: object, time: number) {
     const result = [];
     // totosi.forEach((t) => {
-      Object.keys(data).forEach(function (item) {
-        const obj = getChange(data[item]);
-        setseries(obj, item, getMatchTime());
-        // if (obj.length > 0) {
-        //   result.push({
-        //     name: item,
-        //     x: Math.round((t[0].key - obj[0].key) / 1000),
-        //     oddx: [
-        //       (parseFloat(obj[0].odd[0]) - parseFloat(t[0].odd[0])).toFixed(2),
-        //       (parseFloat(obj[0].odd[1]) - parseFloat(t[0].odd[1])).toFixed(2),
-        //       (parseFloat(obj[0].odd[2]) - parseFloat(t[0].odd[2])).toFixed(2),
-        //     ],
-        //     value: obj[0],
-        //   });
-        // }
-      });
+    Object.keys(data).forEach(function (item) {
+      const obj = getChange(data[item]);
+      setseries(obj, item, getMatchTime());
+      // if (obj.length > 0) {
+      //   result.push({
+      //     name: item,
+      //     x: Math.round((t[0].key - obj[0].key) / 1000),
+      //     oddx: [
+      //       (parseFloat(obj[0].odd[0]) - parseFloat(t[0].odd[0])).toFixed(2),
+      //       (parseFloat(obj[0].odd[1]) - parseFloat(t[0].odd[1])).toFixed(2),
+      //       (parseFloat(obj[0].odd[2]) - parseFloat(t[0].odd[2])).toFixed(2),
+      //     ],
+      //     value: obj[0],
+      //   });
+      // }
+    });
     // });
     return result;
   }
@@ -531,10 +531,7 @@ interface Series {
     const value = getData(window.game);
     window.odd = value.totosi.odd;
     const others = getCloseOthers(value.other, value.time, value.totosi.odd);
-    const latestOthers = getLatestOthers(
-      value.other,
-      value.time,
-    );
+    const latestOthers = getLatestOthers(value.other, value.time);
     renderTotosi(
       value.totosi,
       new Date(value.time).toLocaleString(),
