@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FT analyz
 // @namespace    http://tampermonkey.net/
-// @version      1.6.6
+// @version      2.0.0
 // @description  分析足球数据，图形化展示赔率走势
 // @author       Mr-SPM
 // @match        *://op1.win007.com/oddslist/*
@@ -11,7 +11,6 @@
 // @contributionURL            https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=your.email.here@412354742@qq.com&item_name=Greasy+Fork+donation
 // contributionAmount  6.66
 // ==/UserScript==
-
 declare interface Window {
   time?: number | string;
   hsDetail?: any;
@@ -50,6 +49,8 @@ interface Series {
   // pinnacle 88692817
   // 今年
   const year = new Date().getFullYear();
+
+  let hasInit = false;
   // 创建按钮
   function createButton() {
     const button = document.createElement('button');
@@ -279,7 +280,9 @@ interface Series {
       window.odd[0]
     }/${window.odd[1]}/${window.odd[2]}</div>
     <div>
-      <label>Money:</label><input id="myMoney" type="number" value="300"/><button id="calculator">计算</button>   <button id="myBtn">关闭</button>
+      <label>Money:</label><input id="myMoney" type="number" value="${
+        localStorage.getItem('my.money') || 300
+      }"/><button id="calculator">计算</button>   <button id="myBtn">关闭</button>
       <div id="pay" style="height: 40px;line-height:40px;"></div>
     </div>
     <div id="main1" style="width: 100%;height:300px;"></div>
@@ -334,30 +337,32 @@ interface Series {
 </div>`;
     divDom.innerHTML = divWithTitle;
     document.body.append(divDom);
-    document.getElementById('calculator').onclick = function () {
-      console.log('开始计算');
-      const odd = window.odd;
-      const money =
-        parseFloat(
-          (<HTMLInputElement>document.getElementById('myMoney')).value
-        ) || 300;
-      document.getElementById('pay').innerHTML = `1:${predict(
-        money,
-        window.re,
-        parseFloat(odd[0]),
-        5,
-        1.33
-      )}\n x:${predict(
-        money,
-        window.re,
-        parseFloat(odd[1]),
-        5,
-        0.61
-      )}\n 2:${predict(money, window.re, parseFloat(odd[2]), 5, 0.91)}`;
-    };
+    document.getElementById('calculator').onclick = caculatorTZ;
     document.getElementById('myBtn').onclick = function () {
       document.getElementById('myData').style.display = 'none';
     };
+  }
+
+  function caculatorTZ() {
+    console.log('开始计算');
+    const odd = window.odd;
+    const money =
+      parseFloat(
+        (<HTMLInputElement>document.getElementById('myMoney')).value
+      ) || 300;
+    document.getElementById('pay').innerHTML = `1:${predict(
+      money,
+      window.re,
+      parseFloat(odd[0]),
+      5,
+      1.33
+    )}\n x:${predict(
+      money,
+      window.re,
+      parseFloat(odd[1]),
+      5,
+      0.61
+    )}\n 2:${predict(money, window.re, parseFloat(odd[2]), 5, 0.91)}`;
   }
   // 计算
   function predict(
@@ -534,17 +539,39 @@ interface Series {
     );
   }
 
-  function main() {
-    const value = getData(window.game);
-    const others = getCloseOthers(value.other, value.time, window.odd);
-    const latestOthers = getLatestOthers(value.other, value.time);
-    renderTotosi(
-      value.totosi,
-      new Date(value.time).toLocaleString(),
-      others,
-      latestOthers
-    );
-    renderCharts();
+  function setMyMoney() {
+    document.getElementById('myMoney').onchange = function (e) {
+      localStorage.setItem('my.money', (e.target as any).value);
+    };
   }
+
+  function main() {
+    if (hasInit) {
+      document.getElementById('myData').style.display = 'block';
+    } else {
+      const value = getData(window.game);
+      const others = getCloseOthers(value.other, value.time, window.odd);
+      const latestOthers = getLatestOthers(value.other, value.time);
+      renderTotosi(
+        value.totosi,
+        new Date(value.time).toLocaleString(),
+        others,
+        latestOthers
+      );
+      renderCharts();
+      caculatorTZ();
+      setMyMoney();
+      hasInit = true;
+    }
+  }
+  // function addCSS() {
+  //   const link = document.createElement('link');
+  //   link.href =
+  //     'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css';
+  //   link.rel = 'stylesheet'
+  //   link.type ="text/css"
+  //   document.getElementsByTagName('head')[0].appendChild(link);
+  // }
   createButton();
+  // addCSS();
 })();
