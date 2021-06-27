@@ -285,6 +285,12 @@ interface Series {
       }"/><button id="calculator">计算</button>   <button id="myBtn">关闭</button>
       <div id="pay" style="height: 40px;line-height:40px;"></div>
     </div>
+    <p>
+      <input type="checkbox" id="autoOpen" ${
+        localStorage.getItem('autoOpen') ? 'checked' : ''
+      } />
+      <label>自动打开</label>
+    </p>
     <div id="main1" style="width: 100%;height:300px;"></div>
     <div id="mainx" style="width: 100%;height:300px;"></div>
     <div id="main2" style="width: 100%;height:300px;"></div>
@@ -340,6 +346,9 @@ interface Series {
     document.getElementById('calculator').onclick = caculatorTZ;
     document.getElementById('myBtn').onclick = function () {
       document.getElementById('myData').style.display = 'none';
+    };
+    document.getElementById('autoOpen').onchange = function (e) {
+      localStorage.setItem('autoOpen', (e.target as any).checked ? 'true' : '');
     };
   }
 
@@ -573,5 +582,8 @@ interface Series {
   //   document.getElementsByTagName('head')[0].appendChild(link);
   // }
   createButton();
+  if (localStorage.getItem('autoOpen')) {
+    main();
+  }
   // addCSS();
 })();
