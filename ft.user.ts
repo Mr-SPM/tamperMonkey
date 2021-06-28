@@ -16,7 +16,7 @@ declare interface Window {
   hsDetail?: any;
   odd?: string[];
   $?(): () => HTMLElement;
-  game?: any;
+  game?: string[];
   MatchTime?: any;
   re?: number;
 }
